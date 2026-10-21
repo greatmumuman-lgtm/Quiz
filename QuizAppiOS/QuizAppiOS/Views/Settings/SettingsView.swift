@@ -4,7 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     
     var body: some View {
-        Form {
+        List {
             Section {
                 Picker("主题模式", selection: $settingsManager.settings.themeMode) {
                     Text("跟随系统").tag(ThemeMode.system)
