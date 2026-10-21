@@ -263,6 +263,7 @@ final class PracticeViewModel: ObservableObject {
         }
     }
 
+    @MainActor
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
