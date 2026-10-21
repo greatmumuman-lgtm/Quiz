@@ -57,7 +57,7 @@ struct SettingsView: View {
                         displayedComponents: .hourAndMinute
                     )
                     .datePickerStyle(.compact)
-                    .onChange(of: settingsManager.settings.reminderTime) { _, newTime in
+                    .onChange(of: settingsManager.settings.reminderTime) { newTime in
                         updateReminder(enabled: true, time: newTime)
                     }
                     .onChange(of: settingsManager.settings.reminderEnabled) { _, enabled in
