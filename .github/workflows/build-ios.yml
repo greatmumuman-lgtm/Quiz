@@ -6,23 +6,14 @@ on:
 jobs:
   build:
     runs-on: macos-15
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Show Xcode Version
-      run: xcodebuild -version
-
+      
     - name: Build the app
       run: |
         cd QuizAppiOS
-        
-        # 1. 先解析依赖，避免 Xcode 自动解析时可能出现的网络或认证问题
         xcodebuild -resolvePackageDependencies -scheme QuizAppiOS -derivedDataPath build
-        
-        # 2. 构建应用，加入 -disableAutomaticPackageResolution 避免重复解析
-        #    并加入 EXCLUDED_ARCHS=x86_64 避免编译无关的模拟器架构
         xcodebuild build \
           -scheme QuizAppiOS \
           -sdk iphoneos \
@@ -34,11 +25,10 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           EXCLUDED_ARCHS=x86_64
-
+          
     - name: Package to IPA
       run: |
         cd QuizAppiOS
-        # xcodebuild 默认产物路径
         APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" -type d | head -n 1)
         if [ -z "$APP_PATH" ]; then
           echo "未找到 .app 文件，构建可能失败。"
@@ -47,7 +37,7 @@ jobs:
         mkdir -p Payload
         cp -R "$APP_PATH" Payload/
         zip -r Unsigned.ipa Payload
-
+        
     - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
