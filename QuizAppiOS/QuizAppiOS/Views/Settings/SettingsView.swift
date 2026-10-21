@@ -2,18 +2,15 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
-    @State private var showReminderTimePicker = false
     
     var body: some View {
         Form {
             Section {
-                Picker("主题", selection: $settingsManager.settings.themeMode) {
+                Picker("主题模式", selection: $settingsManager.settings.themeMode) {
                     Text("跟随系统").tag(ThemeMode.system)
                     Text("浅色").tag(ThemeMode.light)
                     Text("深色").tag(ThemeMode.dark)
                 }
-            } header: {
-                Text("外观")
             }
             
             Section {
@@ -30,8 +27,6 @@ struct SettingsView: View {
                             ReminderService.shared.scheduleReminder(at: newTime)
                         }
                 }
-            } header: {
-                Text("学习提醒")
             }
         }
         .navigationTitle("设置")
