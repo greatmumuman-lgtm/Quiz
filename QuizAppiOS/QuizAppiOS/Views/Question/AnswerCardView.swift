@@ -104,7 +104,7 @@ struct SearchView: View {
             .navigationTitle("搜索题目")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("关闭") { dismiss() }
                 }
             }
