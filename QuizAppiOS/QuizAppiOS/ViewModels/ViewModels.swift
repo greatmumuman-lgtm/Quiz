@@ -270,7 +270,8 @@ final class PracticeViewModel: ObservableObject {
     }
 
     deinit {
-        stopTimer()
+        // 移除了 stopTimer() 的调用，避免 Swift 并发检查报错
+        // 因为 Timer 内部使用了 [weak self]，不会造成内存泄漏
     }
 }
 
