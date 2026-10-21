@@ -68,6 +68,8 @@ struct ExamView: View {
                             examMultiOptions(q)
                         case .judge:
                             examJudgeOptions(q)
+                        case .fill:
+                            Text("")
                         }
                     }
                     .padding()
