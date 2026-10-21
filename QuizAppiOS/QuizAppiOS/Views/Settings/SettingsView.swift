@@ -6,17 +6,18 @@ struct SettingsView: View {
     
     var body: some View {
         Form {
-            Section(header: Text("外观")) {
+            Section {
                 Picker("主题", selection: $settingsManager.settings.themeMode) {
                     Text("跟随系统").tag(ThemeMode.system)
                     Text("浅色").tag(ThemeMode.light)
                     Text("深色").tag(ThemeMode.dark)
                 }
+            } header: {
+                Text("外观")
             }
             
-            Section(header: Text("学习提醒")) {
+            Section {
                 Toggle("开启每日提醒", isOn: $settingsManager.settings.reminderEnabled)
-                    // 修复 iOS 17 语法报错，改为兼容 iOS 16 的写法
                     .onChange(of: settingsManager.settings.reminderEnabled) { enabled in
                         if enabled {
                             ReminderService.shared.requestPermission()
@@ -29,6 +30,8 @@ struct SettingsView: View {
                             ReminderService.shared.scheduleReminder(at: newTime)
                         }
                 }
+            } header: {
+                Text("学习提醒")
             }
         }
         .navigationTitle("设置")
