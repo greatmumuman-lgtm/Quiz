@@ -1,121 +1,52 @@
 import SwiftUI
 
-// MARK: - Answer Card View
-
 struct AnswerCardView: View {
-    let questions: [Question]
-    let currentIndex: Int
-    let onJump: (Int) -> Void
-
     @Environment(\.dismiss) private var dismiss
-
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
-
+    @ObservedObject var viewModel: ExamViewModel
+    @State private var searchText = ""
+    
+    var filteredQuestions: [Question] {
+        if searchText.isEmpty {
+            return viewModel.questions
+        } else {
+            return viewModel.questions.filter { $0.content.contains(searchText) }
+        }
+    }
+    
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 8) {
-                    ForEach(Array(questions.enumerated()), id: \.offset) { index, _ in
-                        Button {
-                            onJump(index)
-                            dismiss()
-                        } label: {
-                            Text("\(index + 1)")
-                                .font(.subheadline.bold())
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 44)
-                                .background(cellColor(for: index))
-                                .foregroundColor(index == currentIndex ? .white : .primary)
-                                .cornerRadius(8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(index == currentIndex ? Color.blue : Color(.systemGray4), lineWidth: index == currentIndex ? 2 : 1)
-                                )
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 12) {
+                    ForEach(0..<filteredQuestions.count, id: \.self) { index in
+                        let q = filteredQuestions[index]
+                        if let qId = q.id {
+                            Button {
+                                if let originalIndex = viewModel.questions.firstIndex(where: { $0.id == qId }) {
+                                    viewModel.currentIndex = originalIndex
+                                    dismiss()
+                                }
+                            } label: {
+                                Text("\(index + 1)")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .frame(width: 44, height: 44)
+                                    .background(viewModel.isQuestionAnswered(qId) ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
+                                    .foregroundColor(viewModel.isQuestionAnswered(qId) ? .blue : .primary)
+                                    .cornerRadius(8)
+                            }
                         }
                     }
                 }
                 .padding()
             }
-            .navigationTitle("答题卡 (\(questions.count)题)")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("关闭") { dismiss() }
-                }
-            }
-        }
-    }
-
-    private func cellColor(for index: Int) -> Color {
-        if index == currentIndex { return .blue }
-        return Color(.systemBackground)
-    }
-}
-
-// MARK: - Search View
-
-struct SearchView: View {
-    let bankId: Int64
-    let onSelect: (Question) -> Void
-
-    @State private var searchText = ""
-    @State private var results: [Question] = []
-    @State private var isSearching = false
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VStack {
-                if results.isEmpty && !searchText.isEmpty && !isSearching {
-                    ContentUnavailableView("未找到结果", systemImage: "magnifyingglass", description: Text("尝试其他关键词"))
-                } else if results.isEmpty && searchText.isEmpty {
-                    VStack {
-                        Text("搜索题目")
-                            .font(.headline)
-                            .padding(.top, 32)
-                        Text("输入关键词在当前题库中搜索")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                } else {
-                    List(results) { question in
-                        Button {
-                            onSelect(question)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    TypeTag(question.questionType.label)
-                                    Text(question.content)
-                                        .lineLimit(2)
-                                        .font(.subheadline)
-                                }
-                                if !question.analysis.isEmpty {
-                                    Text(question.analysis)
-                                        .lineLimit(1)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
             .searchable(text: $searchText, prompt: "输入题目关键词")
-            .navigationTitle("搜索题目")
+            .navigationTitle("答题卡")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // 严格使用 ToolbarItem 消除歧义
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("关闭") { dismiss() }
-                }
-            }
-            .onChange(of: searchText) { _, newValue in
-                guard !newValue.isEmpty else { results = []; return }
-                isSearching = true
-                Task {
-                    if let qs = try? QuestionDAO().search(bankId, keyword: newValue) {
-                        results = qs
+                    Button("关闭") {
+                        dismiss()
                     }
-                    isSearching = false
                 }
             }
         }
