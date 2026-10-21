@@ -18,7 +18,7 @@ jobs:
       run: |
         cd QuizAppiOS
         # 使用 SPM 构建 Release 版本
-        swift build -c release
+        swift build -c release --triple arm64-apple-ios
 
     - name: Package to IPA
       run: |
