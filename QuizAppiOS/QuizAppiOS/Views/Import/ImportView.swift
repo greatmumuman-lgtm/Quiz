@@ -92,7 +92,8 @@ struct ImportView: View {
 
                     if viewModel.showSuccess {
                         // Trigger callback
-                        let qs = (try? ParserRegistry.parser(for: url.pathExtension))?
+                        let parser = try? ParserRegistry.parser(for: url.pathExtension)
+                        let qs = parser?
                             .parse(content: (try? String(contentsOf: url, encoding: .utf8)) ?? "", bankId: 0) ?? []
                         try? onImport(viewModel.bankName, qs)
                         dismiss()
