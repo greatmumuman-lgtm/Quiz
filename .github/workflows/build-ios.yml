@@ -11,19 +11,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Show Swift Version
-      run: swift --version
+    - name: Show Xcode Version
+      run: xcodebuild -version
 
     - name: Build the app
       run: |
         cd QuizAppiOS
-        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-        swift build -c release -Xswiftc "-sdk" -Xswiftc "$SDK_PATH" -Xswiftc "-target" -Xswiftc "arm64-apple-ios12.0"
+        # 使用 xcodebuild 原生构建 iOS 版本，跳过签名
+        xcodebuild build \
+          -scheme QuizAppiOS \
+          -sdk iphoneos \
+          -configuration Release \
+          -destination "generic/platform=iOS" \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          -derivedDataPath build
 
     - name: Package to IPA
       run: |
         cd QuizAppiOS
-        APP_PATH=$(find .build/release -name "*.app" -type d | head -n 1)
+        # xcodebuild 默认产物路径
+        APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" -type d | head -n 1)
         if [ -z "$APP_PATH" ]; then
           echo "未找到 .app 文件，构建可能失败。"
           exit 1
