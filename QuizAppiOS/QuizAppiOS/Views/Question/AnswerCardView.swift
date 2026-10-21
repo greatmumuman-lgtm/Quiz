@@ -42,11 +42,8 @@ struct AnswerCardView: View {
             .navigationTitle("答题卡")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // 严格使用 ToolbarItem 消除歧义
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("关闭") {
-                        dismiss()
-                    }
+                    Button("关闭") { dismiss() }
                 }
             }
         }
