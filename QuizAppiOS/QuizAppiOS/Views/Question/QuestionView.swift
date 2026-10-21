@@ -191,7 +191,7 @@ struct QuestionView: View {
                 case .judge:
                     judgeOptions
                 case .fill:
-                    Text("")
+                    Text("填空题")
                 }
 
                 // Result card
