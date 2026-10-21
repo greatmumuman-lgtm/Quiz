@@ -19,13 +19,14 @@ struct QuestionBankDAO {
 
     func insert(_ bank: inout QuestionBank) throws {
         try dbManager.db.write { db in
-            bank.id = try db.executeAndReturnLastInsertedRowID(
+            try db.execute(
                 sql: """
                     INSERT INTO question_banks (name, description, questionCount, importDate)
                     VALUES (?, ?, ?, ?)
                     """,
                 arguments: [bank.name, bank.description, bank.questionCount, bank.importDate.timeIntervalSince1970]
             )
+            bank.id = db.lastInsertedRowID
         }
     }
 
@@ -119,7 +120,7 @@ struct QuestionDAO {
     func insertBatch(_ questions: [Question]) throws {
         try dbManager.db.write { db in
             for q in questions {
-                _ = try db.executeAndReturnLastInsertedRowID(
+                try db.execute(
                     sql: """
                         INSERT INTO questions (bankId, questionType, content, options, answer, analysis)
                         VALUES (?, ?, ?, ?, ?, ?)
@@ -244,7 +245,7 @@ struct ExamRecordDAO {
 
     func insert(_ record: ExamRecord) throws -> Int64 {
         try dbManager.db.write { db in
-            try db.executeAndReturnLastInsertedRowID(sql: """
+            try db.execute(sql: """
                 INSERT INTO exam_records (bankId, score, totalCount, correctCount, questionDetails, examDate)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, arguments: [
@@ -252,6 +253,7 @@ struct ExamRecordDAO {
                 record.correctCount, record.questionDetails,
                 record.examDate.timeIntervalSince1970
             ])
+            return db.lastInsertedRowID
         }
     }
 
@@ -288,7 +290,7 @@ struct PracticeRecordDAO {
 
     func insert(_ record: inout PracticeRecord) throws {
         try dbManager.db.write { db in
-            record.id = try db.executeAndReturnLastInsertedRowID(sql: """
+            try db.execute(sql: """
                 INSERT INTO practice_records (bankId, mode, totalCount, correctCount, wrongCount, duration, practiceDate)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, arguments: [
@@ -296,6 +298,7 @@ struct PracticeRecordDAO {
                 record.correctCount, record.wrongCount,
                 record.duration, record.practiceDate.timeIntervalSince1970
             ])
+            record.id = db.lastInsertedRowID
         }
     }
 
@@ -360,10 +363,11 @@ struct PracticeProgressDAO {
                     WHERE id = ?
                     """, arguments: [progress.currentIndex, answeredStr, wrongStr, Date().timeIntervalSince1970, existing.id!])
             } else {
-                progress.id = try db.executeAndReturnLastInsertedRowID(sql: """
+                try db.execute(sql: """
                     INSERT INTO practice_progress (bankId, mode, currentIndex, answeredIds, wrongIds, updatedAt)
                     VALUES (?, ?, ?, ?, ?, ?)
                     """, arguments: [progress.bankId, progress.mode, progress.currentIndex, answeredStr, wrongStr, Date().timeIntervalSince1970])
+                progress.id = db.lastInsertedRowID
             }
         }
     }
@@ -489,10 +493,11 @@ struct QuestionNoteDAO {
                     UPDATE question_notes SET content = ?, updatedAt = ? WHERE id = ?
                     """, arguments: [note.content, Date().timeIntervalSince1970, existing.id!])
             } else {
-                note.id = try db.executeAndReturnLastInsertedRowID(sql: """
+                try db.execute(sql: """
                     INSERT INTO question_notes (questionId, content, createdAt, updatedAt)
                     VALUES (?, ?, ?, ?)
                     """, arguments: [note.questionId, note.content, Date().timeIntervalSince1970, Date().timeIntervalSince1970])
+                note.id = db.lastInsertedRowID
             }
         }
     }
