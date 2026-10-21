@@ -26,18 +26,27 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           EXCLUDED_ARCHS=x86_64
           
-    - name: Package to IPA
+        - name: Package to IPA
       run: |
         cd QuizAppiOS
-        APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" -type d | head -n 1)
+        
+        # 全局搜索 .app 文件，哪里生成的就从哪里找
+        echo "正在搜索 .app 文件..."
+        APP_PATH=$(find build -name "*.app" -type d | head -n 1)
+        
         if [ -z "$APP_PATH" ]; then
-          echo "未找到 .app 文件，构建可能失败。"
+          echo "❌ 未找到 .app 文件，请检查构建日志。"
+          # 把目录树打印出来看看
+          ls -R build/Build/Products/ || true
           exit 1
         fi
+        
+        echo "✅ 找到 .app 文件: $APP_PATH"
         mkdir -p Payload
         cp -R "$APP_PATH" Payload/
         zip -r Unsigned.ipa Payload
-        
+        echo "✅ 打包 Unsigned.ipa 成功！"
+
     - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
