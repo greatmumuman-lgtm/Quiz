@@ -91,10 +91,14 @@ struct ImportView: View {
                     viewModel.importFile(url: url)
 
                     if viewModel.showSuccess {
-                        // Trigger callback
-                        let parser = try? ParserRegistry.parser(for: url.pathExtension)
-                        let qs = parser?
-                            .parse(content: (try? String(contentsOf: url, encoding: .utf8)) ?? "", bankId: 0) ?? []
+                        // 因为 parser 方法不抛错，直接调用即可
+                        let parser = ParserRegistry.parser(for: url.pathExtension)
+                        
+                        // 尝试读取文件内容并解析
+                        let content = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+                        let qs = (try? parser?.parse(content: content, bankId: 0)) ?? []
+                        
+                        // 触发回调并关闭页面
                         try? onImport(viewModel.bankName, qs)
                         dismiss()
                     }
