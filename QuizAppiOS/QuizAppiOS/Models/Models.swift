@@ -235,7 +235,7 @@ enum PracticeMode: String, CaseIterable {
 }
 
 // MARK: - ThemeMode
-enum ThemeMode: String, CaseIterable {
+enum ThemeMode: String, Codable, CaseIterable, Equatable {
     case system
     case light
     case dark
