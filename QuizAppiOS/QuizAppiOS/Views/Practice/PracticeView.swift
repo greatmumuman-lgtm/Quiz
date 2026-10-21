@@ -235,6 +235,7 @@ struct PracticeView: View {
         case .single: return "circle"
         case .multi: return "checklist"
         case .judge: return "checkmark.circle"
+        case .fill: Text("")
         }
     }
 }
