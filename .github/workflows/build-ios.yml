@@ -1,0 +1,42 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch: # 允许你手动点击按钮触发编译
+
+jobs:
+  build:
+    runs-on: macos-latest # 使用云端的最新 Mac 系统
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Show Xcode Version
+      run: xcodebuild -version
+
+    - name: Build the app
+      run: |
+        cd QuizAppiOS
+        xcodebuild -list -project QuizAppiOS.xcodeproj
+        xcodebuild clean build \
+          -project QuizAppiOS.xcodeproj \
+          -scheme QuizAppiOS \
+          -sdk iphoneos \
+          -configuration Release \
+          -derivedDataPath build \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+    - name: Package to IPA
+      run: |
+        cd QuizAppiOS/build/Build/Products/Release-iphoneos
+        mkdir Payload
+        mv QuizAppiOS.app Payload/
+        zip -r ../../../../Unsigned.ipa Payload
+
+    - name: Upload IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: Unsigned-IPA
+        path: QuizAppiOS/Unsigned.ipa
