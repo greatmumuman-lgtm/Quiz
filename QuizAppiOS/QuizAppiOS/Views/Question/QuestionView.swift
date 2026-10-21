@@ -190,6 +190,8 @@ struct QuestionView: View {
                     multiChoiceOptions
                 case .judge:
                     judgeOptions
+                case .fill:
+                    Text("")
                 }
 
                 // Result card
