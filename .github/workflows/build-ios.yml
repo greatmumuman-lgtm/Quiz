@@ -17,16 +17,23 @@ jobs:
     - name: Build the app
       run: |
         cd QuizAppiOS
-        # 使用 xcodebuild 原生构建 iOS 版本，跳过签名
+        
+        # 1. 先解析依赖，避免 Xcode 自动解析时可能出现的网络或认证问题
+        xcodebuild -resolvePackageDependencies -scheme QuizAppiOS -derivedDataPath build
+        
+        # 2. 构建应用，加入 -disableAutomaticPackageResolution 避免重复解析
+        #    并加入 EXCLUDED_ARCHS=x86_64 避免编译无关的模拟器架构
         xcodebuild build \
           -scheme QuizAppiOS \
           -sdk iphoneos \
           -configuration Release \
           -destination "generic/platform=iOS" \
+          -derivedDataPath build \
+          -disableAutomaticPackageResolution \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
-          -derivedDataPath build
+          EXCLUDED_ARCHS=x86_64
 
     - name: Package to IPA
       run: |
